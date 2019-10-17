@@ -1,6 +1,4 @@
 const { Pool } = require('pg');
-const cohortName = process.argv[2];
-const values = [`%${cohortName}%`, limit];
 
 const pool = new Pool({
   user: 'crol',
@@ -15,9 +13,15 @@ FROM teachers
 JOIN assistance_requests ON teacher_id = teachers.id
 JOIN students ON student_id = students.id
 JOIN cohorts ON cohort_id = cohorts.id
-WHERE cohorts.name = 'cohortName || 'JUL02'}'
-ORDER BY teacher;
+WHERE cohorts.name = '$1|| 'JUL02'}'
+ORDER BY teacher
+LIMIT $2;
 `)
+const cohortName = process.argv[2];
+const limit = process.argv[3] || 5;
+const values = [`%${cohortName}%`, limit];
+pool.query(queryString, values);
+
 .then(res => {
   res.rows.forEach(row => {
     console.log(`${row.cohort}: ${row.teacher}`);
